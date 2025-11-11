@@ -1,8 +1,9 @@
-name: Deploy to AWS EC2
+name: Deploy Node.js App to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main  # Change to your main branch name if different
 
 jobs:
   deploy:
@@ -10,16 +11,17 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
 
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1.2.0
+    - name: Deploy to EC2 via SSH
+      uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          cd /home/ubuntu/nodejs-web-app
+          cd ~/nodejs-web-app
           git pull origin main
-          npm install
-          pm2 restart all || pm2 start app.js
+          npm install pm2
+          pm2 restart nodejs-web-app || pm2 start app.js --name nodejs-web-app
+          pm2 save
